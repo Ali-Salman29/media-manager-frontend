@@ -13,7 +13,6 @@ function SearchPage() {
   const dispatch = useDispatch();
   const {
     results,
-    aggregations,
     total,
     searchQuery,
     selectedDbs,
@@ -108,7 +107,7 @@ function SearchPage() {
           {/* Results Count */}
           {!isLoading && (
             <div className="mt-3 text-sm text-gray-600">
-              Viewing {results.length} of {total} results
+              Viewing {formatCount(results.length)} of {formatCount(total)} results
             </div>
           )}
 

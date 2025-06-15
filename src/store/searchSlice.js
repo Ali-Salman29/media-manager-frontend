@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8000";
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000/api";
 
 // Async thunk for fetching search results
 export const fetchSearchResults = createAsyncThunk(
@@ -17,7 +17,7 @@ export const fetchSearchResults = createAsyncThunk(
       params.append("page", page);
       params.append("page_size", pageSize);
 
-      const url = `${API_BASE_URL}/api/search/?${params.toString()}`;
+      const url = `${API_URL}/search/?${params.toString()}`;
       console.log("Fetching from URL:", url); // Debug log
 
       const response = await fetch(url, {
@@ -73,7 +73,7 @@ export const fetchAggregations = createAsyncThunk(
   "search/fetchAggregations",
   async (_, { rejectWithValue }) => {
     try {
-      const url = `${API_BASE_URL}/api/aggregations/`;
+      const url = `${API_URL}/api/aggregations/`;
       console.log("Fetching aggregations from URL:", url);
       const response = await fetch(url);
       if (!response.ok) {

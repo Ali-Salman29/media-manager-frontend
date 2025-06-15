@@ -1,0 +1,63 @@
+name: Deploy Frontend
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: package-lock.json
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Frontend
+        run: npm run build
+        env:
+          REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          cat >>~/.ssh/config <<END
+          Host ec2
+            HostName ${{ secrets.EC2_HOST }}
+            User ubuntu
+            IdentityFile ~/.ssh/deploy_key
+            StrictHostKeyChecking no
+          END
+
+      - name: Deploy Frontend
+        run: |
+          # Create build directory if it doesn't exist
+          ssh ec2 'mkdir -p /home/ubuntu/media-manager/frontend/build'
+
+          # Deploy only the build directory contents
+          rsync -avz --delete \
+            --exclude 'node_modules' \
+            --exclude '.git' \
+            --exclude 'src' \
+            --exclude 'public' \
+            --exclude 'package.json' \
+            --exclude 'package-lock.json' \
+            ./build/ ec2:/home/ubuntu/media-manager/frontend/build/
+
+          # Set proper permissions
+          ssh ec2 'sudo chown -R ubuntu:ubuntu /home/ubuntu/media-manager/frontend/build'
+
+          # Restart Nginx to ensure it picks up any changes
+          ssh ec2 'sudo systemctl restart nginx'
