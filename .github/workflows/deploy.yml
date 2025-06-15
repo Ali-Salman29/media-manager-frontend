@@ -56,8 +56,5 @@ jobs:
             --exclude 'package-lock.json' \
             ./build/ ec2:/home/ubuntu/media-manager/frontend/build/
 
-          # Set proper permissions
-          ssh ec2 'sudo chown -R ubuntu:ubuntu /home/ubuntu/media-manager/frontend/build'
-
           # Restart Nginx to ensure it picks up any changes
           ssh ec2 'sudo systemctl restart nginx'

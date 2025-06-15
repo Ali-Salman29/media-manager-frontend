@@ -73,7 +73,7 @@ export const fetchAggregations = createAsyncThunk(
   "search/fetchAggregations",
   async (_, { rejectWithValue }) => {
     try {
-      const url = `${API_URL}/api/aggregations/`;
+      const url = `${API_URL}/aggregations/`;
       console.log("Fetching aggregations from URL:", url);
       const response = await fetch(url);
       if (!response.ok) {
