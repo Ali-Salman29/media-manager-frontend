@@ -6,7 +6,7 @@ const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000/api";
 export const fetchSearchResults = createAsyncThunk(
   "search/fetchResults",
   async (
-    { query, selectedDbs, selectedPhotographers, page, pageSize },
+    { query, selectedDbs, selectedPhotographers, fromDate, toDate, page, pageSize },
     { rejectWithValue }
   ) => {
     try {
@@ -14,6 +14,15 @@ export const fetchSearchResults = createAsyncThunk(
       params.append("query", query);
       selectedDbs.forEach(db => params.append("db", db));
       selectedPhotographers.forEach(photographer => params.append("photographer", photographer));
+      
+      // Add date filters if they exist
+      if (fromDate) {
+        params.append("date_from", fromDate);
+      }
+      if (toDate) {
+        params.append("date_to", toDate);
+      }
+      
       params.append("page", page);
       params.append("page_size", pageSize);
 
@@ -102,6 +111,8 @@ const initialState = {
   searchQuery: "",
   selectedDbs: [],
   selectedPhotographers: [],
+  fromDate: "",
+  toDate: "",
   page: 1,
   isLoading: false,
   error: null,
@@ -140,12 +151,30 @@ const searchSlice = createSlice({
       state.page = 1;
       state.results = [];
     },
+    setFromDate: (state, action) => {
+      state.fromDate = action.payload;
+      state.page = 1;
+      state.results = [];
+    },
+    setToDate: (state, action) => {
+      state.toDate = action.payload;
+      state.page = 1;
+      state.results = [];
+    },
+    clearDateFilters: (state) => {
+      state.fromDate = "";
+      state.toDate = "";
+      state.page = 1;
+      state.results = [];
+    },
     incrementPage: (state) => {
       state.page += 1;
     },
     clearFilters: (state) => {
       state.selectedDbs = [];
       state.selectedPhotographers = [];
+      state.fromDate = "";
+      state.toDate = "";
       state.page = 1;
       state.results = [];
     },
@@ -189,6 +218,9 @@ export const {
   setSearchQuery,
   setSelectedDb,
   setSelectedPhotographer,
+  setFromDate,
+  setToDate,
+  clearDateFilters,
   incrementPage,
   clearFilters,
 } = searchSlice.actions;
